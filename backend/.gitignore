@@ -1,2 +1,3 @@
-backend/key.json
-.envbackend/key.json
+node_modules
+.env
+key.json
