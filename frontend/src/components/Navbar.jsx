@@ -1,105 +1,184 @@
-import React, { useState, useContext } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useContext, useEffect } from "react";
+import { Link, NavLink } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Home,
+  PlusSquare,
+  Eye,
+  LogOut,
+  User,
+  ShoppingBag,
+  Moon,
+  Sun,
+  LogIn,
+} from "lucide-react";
 
 const Navbar = () => {
   const { user, logOut } = useContext(AuthContext);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
+  const [mobileMenu, setMobileMenu] = useState(false);
 
-  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
-  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
+  };
+
+  const toggleMobileMenu = () => setMobileMenu(!mobileMenu);
 
   return (
-    <nav className="bg-blue-600 text-white p-4 flex justify-between items-center">
-      {/* Logo */}
-      <div className="text-xl font-bold">
-        <Link to="/">AI Model Inventory</Link>
-      </div>
-
-      {/* Desktop Links */}
-      <div className="hidden md:flex items-center gap-4 relative">
-        <Link to="/">Home</Link>
-        <Link to="/add-model">Add Model</Link>
-        <Link to="/models">View Models</Link>
-
-        {user ? (
-          <div className="relative">
-            <img
-              src={user.photoURL || "/default-profile.png"}
-              alt="profile"
-              className="w-10 h-10 rounded-full cursor-pointer ml-4"
-              onClick={toggleDropdown}
-            />
-            {dropdownOpen && (
-              <div className="absolute right-0 mt-2 bg-white text-black rounded shadow-lg p-4 w-48 z-50">
-                <p className="font-bold">{user.displayName}</p>
-                <p className="text-sm mb-2">{user.email}</p>
-                <Link to="/my-purchases" className="block py-1 hover:text-blue-600" onClick={() => setDropdownOpen(false)}>My Purchases</Link>
-                <Link to="/my-models" className="block py-1 hover:text-blue-600" onClick={() => setDropdownOpen(false)}>My Models</Link>
-                <button
-                  onClick={() => { logOut(); setDropdownOpen(false); }}
-                  className="text-red-500 mt-2 w-full text-left"
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <Link to="/login" className="bg-white text-blue-600 px-3 py-1 rounded ml-4">Login</Link>
-        )}
-      </div>
-
-      {/* Mobile Hamburger */}
-      <div className="md:hidden flex items-center">
-        <button onClick={toggleMobileMenu} className="text-white focus:outline-none">
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
+    <nav className="shadow-lg sticky top-0 z-50" style={{ backgroundColor: "#016B61" }}>
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-5 py-3">
+        {/* ===== Logo Section ===== */}
+        <div className="flex items-center gap-2">
+          <div
+            className="relative cursor-pointer"
+            onClick={toggleMobileMenu}
           >
-            {mobileMenuOpen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
-      </div>
+            <img
+              src="https://i.ibb.co/VkM56Yv/688aecfb47d8cafab021cd4b-145-inventory-management-ai-agents.png"
+              alt="logo"
+              className="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-[#70B2B2] shadow-md"
+            />
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="absolute top-16 left-0 w-full bg-blue-600 text-white flex flex-col gap-4 p-4 md:hidden z-40">
-          <Link to="/" onClick={toggleMobileMenu}>Home</Link>
-          <Link to="/add-model" onClick={toggleMobileMenu}>Add Model</Link>
-          <Link to="/models" onClick={toggleMobileMenu}>View Models</Link>
+            {/* Mobile Menu */}
+            <AnimatePresence>
+              {mobileMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute left-0 mt-14 bg-[#70B2B2] text-white rounded-lg shadow-lg w-40 p-3 md:hidden flex flex-col gap-2"
+                >
+                  <NavLink
+                    to="/"
+                    className="py-2 px-2 rounded hover:bg-[#016B61]"
+                    onClick={() => setMobileMenu(false)}
+                  >
+                    <Home size={18} /> Home
+                  </NavLink>
+                  <NavLink
+                    to="/add-model"
+                    className="py-2 px-2 rounded hover:bg-[#016B61]"
+                    onClick={() => setMobileMenu(false)}
+                  >
+                    <PlusSquare size={18} /> Add Model
+                  </NavLink>
+                  <NavLink
+                    to="/models"
+                    className="py-2 px-2 rounded hover:bg-[#016B61]"
+                    onClick={() => setMobileMenu(false)}
+                  >
+                    <Eye size={18} /> View Models
+                  </NavLink>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
-          {user ? (
-            <>
-              <div className="flex items-center gap-2 mt-2">
-                <img src={user.photoURL || "/default-profile.png"} alt="profile" className="w-8 h-8 rounded-full" />
-                <div>
-                  <p className="font-bold">{user.displayName}</p>
-                  <p className="text-sm">{user.email}</p>
-                </div>
-              </div>
-              <Link to="/my-purchases" className="py-1" onClick={toggleMobileMenu}>My Purchases</Link>
-              <Link to="/my-models" className="py-1" onClick={toggleMobileMenu}>My Models</Link>
-              <button
-                onClick={() => { logOut(); toggleMobileMenu(); }}
-                className="text-red-500 mt-2 w-full text-left"
+          {/* Desktop: Show Text */}
+          
+        </div>
+
+        {/* ===== Desktop Menu ===== */}
+        <div className="hidden md:flex items-center gap-8 text-white">
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              isActive
+                ? "flex items-center gap-2 text-[#70B2B2] font-semibold"
+                : "flex items-center gap-2 hover:text-[#70B2B2] transition-colors"
+            }
+          >
+            <Home size={22} /> Home
+          </NavLink>
+          <NavLink
+            to="/add-model"
+            className={({ isActive }) =>
+              isActive
+                ? "flex items-center gap-2 text-[#70B2B2] font-semibold"
+                : "flex items-center gap-2 hover:text-[#70B2B2] transition-colors"
+            }
+          >
+            <PlusSquare size={22} /> Add Model
+          </NavLink>
+          <NavLink
+            to="/models"
+            className={({ isActive }) =>
+              isActive
+                ? "flex items-center gap-2 text-[#70B2B2] font-semibold"
+                : "flex items-center gap-2 hover:text-[#70B2B2] transition-colors"
+            }
+          >
+            <Eye size={22} /> View Models
+          </NavLink>
+        </div>
+
+        {/* ===== Right Section ===== */}
+        <div className="flex items-center gap-4">
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-full bg-[#70B2B2] hover:bg-[#016B61] text-white transition-colors"
+          >
+            {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
+          </button>
+
+          {/* Login/Profile */}
+          {!user ? (
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link
+                to="/login"
+                className="flex items-center gap-2 px-4 py-2 bg-[#70B2B2] hover:bg-[#016B61] text-white rounded-lg font-semibold transition-colors"
               >
-                Logout
-              </button>
-            </>
+                <LogIn size={18} className="animate-bounce" />
+                <span>Login</span>
+              </Link>
+            </motion.div>
           ) : (
-            <Link to="/login" className="bg-white text-blue-600 px-3 py-1 rounded" onClick={toggleMobileMenu}>Login</Link>
+            <div className="dropdown dropdown-end">
+              <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
+                <div className="w-12 md:w-14 rounded-full border-2 border-[#70B2B2]">
+                  <img src={user.photoURL || "/default-profile.png"} alt="profile" />
+                </div>
+              </label>
+              <ul
+                tabIndex={0}
+                className="dropdown-content menu p-2 shadow-lg rounded-box w-52 mt-3 bg-[#70B2B2] text-white"
+              >
+                <li>
+                  <p className="font-semibold">{user.displayName || "User"}</p>
+                </li>
+                <li>
+                  <p className="text-sm truncate">{user.email}</p>
+                </li>
+                <li>
+                  <Link to="/my-models" className="justify-between hover:bg-[#016B61] rounded">
+                    My Models <User size={16} />
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/my-purchases" className="justify-between hover:bg-[#016B61] rounded">
+                    My Purchases <ShoppingBag size={16} />
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    onClick={() => logOut()}
+                    className="text-red-600 justify-between hover:bg-[#016B61] rounded"
+                  >
+                    Logout <LogOut size={16} />
+                  </button>
+                </li>
+              </ul>
+            </div>
           )}
         </div>
-      )}
+      </div>
     </nav>
   );
 };

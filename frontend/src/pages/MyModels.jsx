@@ -1,44 +1,50 @@
-// FeaturedModels.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
-const FeaturedModels = () => {
+const MyModels = () => {
+  const { user } = useContext(AuthContext);
   const [models, setModels] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchModels = async () => {
-      try {
-        const res = await fetch("https://ai-model-inventory-server.vercel.app/models/latest");
-        const data = await res.json();
-        if (data.success) {
+    if (!user?.email) return;
+
+    fetch(`https://ai-model-inventory-server.vercel.app/models?email=${user.email}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.data)) {
           setModels(data.data);
         } else {
-          console.error("Failed to fetch models");
+          setModels([]);
         }
-      } catch (err) {
-        console.error(err);
-      } finally {
         setLoading(false);
-      }
-    };
+      })
+      .catch(err => {
+        console.error(err);
+        setModels([]);
+        setLoading(false);
+      });
+  }, [user?.email]);
 
-    fetchModels();
-  }, []);
+  if (!user)
+    return <p className="text-center mt-10 text-gray-600">Please login to view your models.</p>;
 
   if (loading)
-    return <p className="text-center mt-10 text-gray-600">Loading Featured Models...</p>;
+    return (
+      <div className="flex justify-center items-center mt-20">
+        <span className="loading loading-spinner loading-xl text-[#016B61]"></span>
+      </div>
+    );
 
-  if (models.length === 0)
-    return <p className="text-center mt-10 text-gray-500">No models available</p>;
+  if (!models || models.length === 0)
+    return <p className="text-center mt-10 text-gray-500">You have no models.</p>;
 
   return (
-    <div className="max-w-6xl mx-auto mt-10 mb-10 px-4">
-      <h2 className="text-3xl font-bold mb-8 text-center text-[#016B61]">
-        Featured AI Models
-      </h2>
+    <div className="max-w-6xl mx-auto mt-10 px-4">
+      <h2 className="text-3xl font-bold mb-8 text-center text-[#016B61]">My AI Models</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {models.map((model) => (
+        {models.map(model => (
           <div
             key={model._id}
             className="relative rounded-3xl overflow-hidden shadow-md transform hover:scale-105 transition-all duration-300"
@@ -51,21 +57,20 @@ const FeaturedModels = () => {
               {/* Image */}
               <div className="overflow-hidden rounded-t-3xl">
                 <img
-                  src={
-                    model.image ||
-                    "https://via.placeholder.com/400x250?text=No+Image+Available"
-                  }
-                  alt={model.name}
+                  src={model.image || "https://via.placeholder.com/400x250?text=No+Image"}
+                  alt={model.name || "Unnamed Model"}
                   className="w-full h-60 object-cover transition-transform duration-500 hover:scale-110"
                 />
               </div>
 
               {/* Content */}
               <div className="p-5 bg-[#E5E9C5]">
-                <h3 className="text-xl text-[#016B61] md:text-2xl font-bold mb-2">{model.name}</h3>
-                <p className="text-sm text-[#016B61] font-medium mb-2">Framework: {model.framework}</p>
-                <p className="text-[#016B61] text-sm mb-4">
-                  {model.description.slice(0, 30)}...
+                <h3 className="text-xl text-[#016B61] md:text-2xl font-bold mb-2">{model.name || "Unnamed Model"}</h3>
+                <p className="text-sm text-[#016B61] font-medium mb-2">Framework: {model.framework || "N/A"}</p>
+                <p className="text-sm text-[#016B61] mb-4">
+                  {model.description
+                    ? model.description.slice(0, 30) + "..."
+                    : "No description available"}
                 </p>
 
                 {/* Button */}
@@ -97,4 +102,4 @@ const FeaturedModels = () => {
   );
 };
 
-export default FeaturedModels;
+export default MyModels;

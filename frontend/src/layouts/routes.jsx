@@ -1,44 +1,75 @@
 import { createBrowserRouter } from "react-router-dom";
-import MainLayout from "./MainLayout";
 import Home from "../components/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
-import Banner from "../components/Banner";
 import AddModel from "../pages/AddModel";
+import ViewModels from "../pages/ViewModels";
+import ModelDetails from "../pages/ModelDetails";
+import UpdateModel from "../pages/UpdateModel";
+import ErrorPage from "../pages/ErrorPage";
+import MyModels from "../pages/MyModels";
+import MainLayout from "./MainLayout";
+import MyPurchases from "../pages/MyPurchases";
+import PrivateRoute from "./PrivateRoute";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <MainLayout />,
     children: [
+      { index: true, element: <Home /> },
+      { path: "/login", element: <Login /> },
+      { path: "/register", element: <Register /> },
       {
-        index: true,
-        element: <Home />, // ✅ JSX element আকারে দিতে হবে
+        path: "/add-model",
+        element: (
+          <PrivateRoute>
+            <AddModel />
+          </PrivateRoute>
+        ),
       },
-      
       {
-        path:"login",
-        element:<Login/>
+        path: "/my-purchases",
+        element: (
+          <PrivateRoute>
+            <MyPurchases />
+          </PrivateRoute>
+        ),
       },
       {
-        path:"register",
-        element:<Register/>
-      }
-      ,
+        path: "/my-models",
+        element: (
+          <PrivateRoute>
+            <MyModels />
+          </PrivateRoute>
+        ),
+      },
       {
-        path:"/add-model",
-        element:<AddModel/>
-      }
-      ,
+        path: "/models",
+        element: (
+          <PrivateRoute>
+            <ViewModels />
+          </PrivateRoute>
+        ),
+      },
       {
-        path:"/add-model",
-        element:<AddModel/>
-      }
-      ,
+        path: "/models/:id",
+        element: (
+          <PrivateRoute>
+            <ModelDetails />
+          </PrivateRoute>
+        ),
+      },
       {
-        path:"/add-model",
-        element:<AddModel/>
-      }
+        path: "/update-model/:id",
+        element: (
+          <PrivateRoute>
+            <UpdateModel />
+          </PrivateRoute>
+        ),
+      },
+      // Always last
+      { path: "*", element: <ErrorPage /> },
     ],
   },
 ]);
